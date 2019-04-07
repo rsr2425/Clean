@@ -14,6 +14,8 @@ import os
 import sys
 import spacy
 
+import numpy as np
+
 from sklearn.preprocessing import normalize
 from sklearn.cluster import KMeans
 
@@ -30,13 +32,13 @@ for file in os.listdir(dir):
      f =  open(dir + '/' + file)
      text = f.read()
      docs[filename] = nlp(text).vector
-     docs[filename] = normalize(docs[filename])
+     #docs[filename] = normalize(np.array(docs[filename]), axis=0)
 n = len(docs)
 
 
 # determine number of clusters
 X = list(docs.values())
-n_clusters = 3
+n_clusters = int(sys.argv[2])
 
 kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(X)
 print(list(zip(docs.keys(), kmeans.labels_)))

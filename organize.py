@@ -41,12 +41,12 @@ for file in os.listdir(dir):
      f =  open(dir + '/' + file)
      try:
          text = f.read()
+         docs[filename] = nlp(text).vector
+         docs[filename] = np.array(docs[filename]).reshape(-1, 1)
+         docs[filename] = np.linalg.norm(docs[filename], axis=1)
+         docs[filename] = np.squeeze(docs[filename])
      except UnicodeDecodeError:
          pass
-     docs[filename] = nlp(text).vector
-     docs[filename] = np.array(docs[filename]).reshape(-1, 1)
-     docs[filename] = np.linalg.norm(docs[filename], axis=1)
-     docs[filename] = np.squeeze(docs[filename])
      f.close()
 n = len(docs)
 

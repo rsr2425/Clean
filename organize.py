@@ -21,6 +21,7 @@ Low-hanging fruit for improvement:
 import os
 import sys
 import spacy
+import pickle
 
 import numpy as np
 
@@ -38,11 +39,15 @@ docs = {}
 for file in os.listdir(dir):
      filename = os.fsdecode(file)
      f =  open(dir + '/' + file)
-     text = f.read()
+     try:
+         text = f.read()
+     except UnicodeDecodeError:
+         pass
      docs[filename] = nlp(text).vector
      docs[filename] = np.array(docs[filename]).reshape(-1, 1)
      docs[filename] = np.linalg.norm(docs[filename], axis=1)
      docs[filename] = np.squeeze(docs[filename])
+     f.close()
 n = len(docs)
 
 # determine number of clusters
@@ -78,4 +83,8 @@ for i, cs in enumerate(cls_cnt):
          res += c
      print(res)
 
-# create a label for each cluster
+# store for analysis later in pickle file
+# e.g. in 'All_clusters_10k.pkl'
+pklf = open(sys.argv[3], 'wb')
+pickle.dump(cls_cnt, pklf)
+pklf.close()

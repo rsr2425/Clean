@@ -8,6 +8,14 @@ NOTE: Although the final form of this application will actually move the
 files into folders based on the categories (and eventually hierarchy)
 developed eventually, for the time being it just prints out the proposed
 structure.
+
+Low-hanging fruit for improvement:
+- Use argparse instead of sys.argv directly
+- I should stop being lazy about dealing with paths because it's making
+  the code a bit fragile.
+- Might want to profile the code soon to scale up because it's a bit lagely
+  on large files.
+
 '''
 
 import os
@@ -32,15 +40,42 @@ for file in os.listdir(dir):
      f =  open(dir + '/' + file)
      text = f.read()
      docs[filename] = nlp(text).vector
-     #docs[filename] = normalize(np.array(docs[filename]), axis=0)
+     docs[filename] = np.array(docs[filename]).reshape(-1, 1)
+     docs[filename] = np.linalg.norm(docs[filename], axis=1)
+     docs[filename] = np.squeeze(docs[filename])
 n = len(docs)
-
 
 # determine number of clusters
 X = list(docs.values())
 n_clusters = int(sys.argv[2])
-
+#print(docs)
 kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(X)
-print(list(zip(docs.keys(), kmeans.labels_)))
+results = list(zip(docs.keys(), kmeans.labels_))
+
+# count how many of each class was assigned to a cluster with cls_cnt
+cls_cnt = [None] * n_clusters
+for r in results:
+     # print(r)
+     idx = r[1]
+     class_name = r[0].split(sep='_')[0]
+     try:
+         cls_cnt[idx][class_name] += 1
+     except KeyError:
+         cls_cnt[idx][class_name] = 1
+     except TypeError:
+         cls_cnt[idx] = {}
+         cls_cnt[idx][class_name] = 1
+
+# for i, c in enumerate(cls_in_clstr):
+#    print(f'Cluster {i}:')
+#    print(f'{c}')
+for i, cs in enumerate(cls_cnt):
+     print('*'*20)
+     print(f'Cluster {i}: {cs}')
+     res = 0
+     for key, c in cs.items():
+         print(f'{key}: {c}')
+         res += c
+     print(res)
 
 # create a label for each cluster

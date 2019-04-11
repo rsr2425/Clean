@@ -23,6 +23,7 @@ import sys
 import spacy
 import pickle
 
+import hypertools as hyp
 import numpy as np
 
 from sklearn.preprocessing import normalize
@@ -88,3 +89,9 @@ for i, cs in enumerate(cls_cnt):
 pklf = open(sys.argv[3], 'wb')
 pickle.dump(cls_cnt, pklf)
 pklf.close()
+
+# plot data using hypertools to visualize these high-dimensional vectors
+X = np.array(X)
+geo = hyp.plot(X, ndims=2, n_clusters=9)
+
+geo.save('projection')
